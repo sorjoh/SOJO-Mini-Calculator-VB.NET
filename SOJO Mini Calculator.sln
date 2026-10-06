@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SOJO Mini Calculator", "SOJO Mini Calculator.vbproj", "{CF3D8FE0-5352-47D3-BFB2-585F528C1FAE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CF3D8FE0-5352-47D3-BFB2-585F528C1FAE}.Debug|x86.ActiveCfg = Debug|x86
+		{CF3D8FE0-5352-47D3-BFB2-585F528C1FAE}.Debug|x86.Build.0 = Debug|x86
+		{CF3D8FE0-5352-47D3-BFB2-585F528C1FAE}.Release|x86.ActiveCfg = Release|x86
+		{CF3D8FE0-5352-47D3-BFB2-585F528C1FAE}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
