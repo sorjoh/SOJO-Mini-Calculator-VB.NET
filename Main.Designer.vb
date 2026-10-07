@@ -152,7 +152,7 @@ Partial Class Main
         Me.Minus.Size = New System.Drawing.Size(54, 54)
         Me.Minus.TabIndex = 12
         Me.Minus.Tag = "Function"
-        Me.Minus.Text = "−"
+        Me.Minus.Text = "-"
         Me.Minus.UseVisualStyleBackColor = False
         '
         'Four
@@ -321,6 +321,7 @@ Partial Class Main
         Me.Controls.Add(Me.Dot)
         Me.Controls.Add(Me.Zero)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
+        Me.KeyPreview = True
         Me.Name = "Main"
         Me.Text = "SOJO Mini Calculator"
         Me.DisplayTable.ResumeLayout(False)

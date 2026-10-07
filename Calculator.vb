@@ -2,7 +2,6 @@
     ' Get decimal seperator
     Public Shared DOT_SIGN As String = Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator
 
-
     ' ========= OPERATORS =========
     Public Enum Operators
         PLUS
@@ -20,11 +19,11 @@
 
         Select Case op
             Case Operators.PLUS
-                sign = "+"
+                sign = " + "
             Case Operators.MINUS
-                sign = "−"
+                sign = " - "
             Case Operators.MULTIPLY
-                sign = "x"
+                sign = "×"
             Case Operators.DIVIDE
                 sign = "÷"
         End Select
@@ -42,7 +41,7 @@
                 op = Calculator.Operators.PLUS
             Case "−", "-"
                 op = Calculator.Operators.MINUS
-            Case "x", "×"
+            Case "×", "x", "*", "x", "X"
                 op = Calculator.Operators.MULTIPLY
             Case "÷", "/"
                 op = Calculator.Operators.DIVIDE
