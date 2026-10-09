@@ -208,7 +208,7 @@ Partial Class Main
         Me.Divide.Size = New System.Drawing.Size(54, 54)
         Me.Divide.TabIndex = 14
         Me.Divide.Tag = "Function"
-        Me.Divide.Text = "÷"
+        Me.Divide.Text = "/"
         Me.Divide.UseVisualStyleBackColor = False
         '
         'Seven
@@ -264,7 +264,7 @@ Partial Class Main
         Me.Multiply.Size = New System.Drawing.Size(54, 54)
         Me.Multiply.TabIndex = 15
         Me.Multiply.Tag = "Function"
-        Me.Multiply.Text = "×"
+        Me.Multiply.Text = "*"
         Me.Multiply.UseVisualStyleBackColor = False
         '
         'DisplayTable

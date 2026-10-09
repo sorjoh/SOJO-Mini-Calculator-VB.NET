@@ -1,7 +1,4 @@
 ﻿Public Class Calculator
-    ' Get decimal seperator
-    Public Shared DOT_SIGN As String = Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator
-
     ' ========= OPERATORS =========
     Public Enum Operators
         PLUS
@@ -19,9 +16,9 @@
 
         Select Case op
             Case Operators.PLUS
-                sign = " + "
+                sign = "+"
             Case Operators.MINUS
-                sign = " - "
+                sign = "-"
             Case Operators.MULTIPLY
                 sign = "×"
             Case Operators.DIVIDE
@@ -41,7 +38,7 @@
                 op = Calculator.Operators.PLUS
             Case "−", "-"
                 op = Calculator.Operators.MINUS
-            Case "×", "x", "*", "x", "X"
+            Case "×", "*", "x", "X"
                 op = Calculator.Operators.MULTIPLY
             Case "÷", "/"
                 op = Calculator.Operators.DIVIDE
@@ -71,23 +68,6 @@
         End Select
 
         Return result
-    End Function
-
-
-    ' ========= FORMAT VALUE =========
-    Public Shared Function FormatValue(ByVal input As String, Optional ByVal forceFormat As Boolean = False) As String
-
-        If input.Length > 1 And input.Substring(0, 1) = "0" And input.Contains(DOT_SIGN) = False Then
-            Return input.Substring(1)
-        ElseIf input.Contains(DOT_SIGN) Then
-            If forceFormat Then
-                Return Format(CDbl(input), "##,##0.#####################")
-            Else
-                Return input
-            End If
-        Else
-            Return Format(CDbl(input), "##,##0.#####################")
-        End If
     End Function
 
 End Class

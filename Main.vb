@@ -1,8 +1,10 @@
-﻿' ***************************************************
+﻿' **********************************************************************************************************************************************
 '
-'               SOJO Mini Calculator
+'   SOJO Mini Calculator
+' 
+'   inspired from https://ecdn.teacherspayteachers.com/thumbitem/Calculator-Functions-Anchor-Chart-11020447-1707050000/original-11020447-1.jpg
 '
-' ***************************************************
+' **********************************************************************************************************************************************
 
 ' ========= MAIN FORM =========
 Public Class Main
@@ -11,9 +13,10 @@ Public Class Main
     Const _DEBUG As Boolean = True
 
     ' Use rounded controls or not
-    Const ROUNDED_BUTTON As Boolean = False
-    Const ROUNDED_DISPLAY As Boolean = False
+    Const ROUNDED_BUTTON As Boolean = True
+    Const ROUNDED_DISPLAY As Boolean = True
 
+    ' Background and text colors
     Const CALCULATOR_BACKGROUND_COLOR As Integer = &HFF585A67
 
     Const DISPLAY_BACKGROUND_COLOR As Integer = &HFFC1D797
@@ -26,7 +29,7 @@ Public Class Main
     Const FUNCTION_TEXT_COLOR As Integer = &HFFFDFFFE
 
     ' Max length of the display numbers
-    Const MAX_LENGTH As Integer = 13
+    Const MAX_OUTPUT_LENGTH As Integer = 12
 
     ' Status indicator if equal button or another calculation has presented a total result
     Dim hasResult As Boolean
@@ -35,13 +38,16 @@ Public Class Main
     Dim currentOperator As Calculator.Operators = Calculator.Operators.NONE
 
     ' Variables holding the result and input values
-    Dim result As Double = 0
-    Dim firstValue As Double = 0
-    Dim secondValue As Double = 0
+    Dim resultValue As Double
+    Dim firstValue As Double
+    Dim secondValue As Double
 
     ' Variables holding the input and output text
-    Dim inputText As String = ""
-    Dim outputText As String = ""
+    Dim inputValue As String
+    Dim outputValue As String
+
+    ' Get decimal seperator
+    Dim DECIMAL_SEPARATOR As String = "." 'Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator
 
     ' ========= MAIN FORM - Control Added =========
     Private Sub Main_ControlAdded(sender As Object, e As System.Windows.Forms.ControlEventArgs) Handles Me.ControlAdded
@@ -55,7 +61,7 @@ Public Class Main
         Me.ActiveControl = Nothing
 
         ' Change period symbol for current language
-        Dot.Text = Calculator.DOT_SIGN
+        Dot.Text = DECIMAL_SEPARATOR
 
         ' Change background color for the main form
         Me.BackColor = Color.FromArgb(CALCULATOR_BACKGROUND_COLOR)
@@ -82,258 +88,163 @@ Public Class Main
             End If
         Next
 
-        ' Select the result display as default
-        Display.Select()
+        ' Set the operator sign for operator buttons
+        Plus.Text = Calculator.getOperatorSign(Calculator.Operators.PLUS)
+        Minus.Text = Calculator.getOperatorSign(Calculator.Operators.MINUS)
+        Multiply.Text = Calculator.getOperatorSign(Calculator.Operators.MULTIPLY)
+        Divide.Text = Calculator.getOperatorSign(Calculator.Operators.DIVIDE)
+
+        ResetValues()
+        DisplayOutput("0")
     End Sub
 
 
-    ' ========= NUMBER BUTTONS =========
-    Private Sub NumberButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Zero.Click, One.Click, Two.Click, Three.Click, Four.Click, Five.Click, Six.Click, Seven.Click, Eight.Click, Nine.Click, Dot.Click
+    ' ========= NUMBER INPUT =========
+    Private Sub NumberInput_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Zero.Click, One.Click, Two.Click, Three.Click, Four.Click, Five.Click, Six.Click, Seven.Click, Eight.Click, Nine.Click
         ' Get the current selected button
         Dim btn = CType(sender, Button)
 
-        If _DEBUG Then Debug.Print("Number(before)=" & btn.Text & " : inputText=" & inputText & ", outputText=" & outputText & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator))
+        If _DEBUG Then Debug.Print("Number(before) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
 
-        If hasResult Then
-            outputText = ""
-            currentOperator = Calculator.Operators.NONE
-            hasResult = False
-        End If
+        If hasResult Then ResetValues()
 
-        'TODO: -3 + 5 = (2)
-
-        ' Check if a period exist and if not check if its a empty string and if so add a zero before the period
-        If btn.Text = Calculator.DOT_SIGN Then
-            If inputText.Contains(Calculator.DOT_SIGN) Then Return
-
-            If outputText = "" Then outputText = "0"
+        If outputValue = "0" Or outputValue = "" Then
+            ResetValues()
+            inputValue = btn.Text
+        ElseIf outputValue.Length > MAX_OUTPUT_LENGTH Then
+            Return
         Else
-            ' Check if the output is zero and clear it if so
-            If outputText = "0" Then outputText = ""
+            inputValue &= btn.Text
         End If
 
-        ' Add key to the values
-        inputText &= btn.Text
-        outputText &= btn.Text
+        outputValue &= btn.Text
 
-        ' Show and store the outputValue
-        Display.Text = outputText
+        DisplayOutput(outputValue)
 
-        If _DEBUG Then Debug.Print("Number(after)=" & btn.Text & " : inputText=" & inputText & ", outputText=" & outputText & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator))
-
-        ' Select the result display as default
-        Display.Select()
+        If _DEBUG Then Debug.Print("Number(after) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
     End Sub
 
 
-    ' ========= OPERATOR BUTTONS =========
-    Private Sub OperatorButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Plus.Click, Minus.Click, Multiply.Click, Divide.Click
+    ' ========= DECIMAL INPUT =========
+    Private Sub DecimalInput_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Dot.Click
+        If _DEBUG Then Debug.Print("Decimal(before) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
+
+        If inputValue.Contains(DECIMAL_SEPARATOR) Then Return
+
+        If inputValue = "" Then
+            inputValue = "0" & DECIMAL_SEPARATOR
+        Else
+            inputValue &= DECIMAL_SEPARATOR
+        End If
+
+        If outputValue = "" Then
+            outputValue = "0" & DECIMAL_SEPARATOR
+        Else
+            outputValue &= DECIMAL_SEPARATOR
+        End If
+
+        DisplayOutput(outputValue)
+
+        If _DEBUG Then Debug.Print("Decimal(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
+    End Sub
+
+    ' ========= OPERATOR INPUT =========
+    Private Sub OperatorInput_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Plus.Click, Minus.Click, Multiply.Click, Divide.Click
         ' Get the current selected button
         Dim btn = CType(sender, Button)
 
-        If _DEBUG Then Debug.Print("Operator(before)=" & btn.Text & " : firstValue=" & firstValue & ", secondValue=" & secondValue & ", result=" & result & ", inputText=" & inputText & ", outputText=" & outputText & ", currentOperation=" & Calculator.getOperatorSign(currentOperator))
+        If _DEBUG Then Debug.Print("Operator(before) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
 
-        ' Set current operation
-        Dim previousOperation = currentOperator
-        currentOperator = Calculator.getOperator(btn.Text)
+        If inputValue = "" Then
+            ResetValues()
 
-        ' Set the firstValue if it's zero or else set the second value
-        If hasResult Then
-            firstValue = result
-        ElseIf firstValue = 0 Then
-            Double.TryParse(inputText, firstValue)
-        Else
-            Double.TryParse(inputText, secondValue)
-        End If
-
-        ' Check if MINUS is pressed and if input is zero or blank
-        If outputText = "" Or outputText = "0" Then
-            If currentOperator = Calculator.Operators.MINUS Then
-                outputText = Calculator.getOperatorSign(Calculator.Operators.MINUS)
-
-                hasResult = False
-
-                result = 0
-                firstValue = 0
-                secondValue = 0
-
-                currentOperator = Calculator.Operators.NONE
-                previousOperation = Calculator.Operators.NONE
+            If btn.Text = Calculator.getOperatorSign(Calculator.Operators.MINUS) Then
+                inputValue = Calculator.getOperatorSign(Calculator.Operators.MINUS)
+                outputValue = Calculator.getOperatorSign(Calculator.Operators.MINUS)
             Else
-                outputText = "0" & Calculator.getOperatorSign(currentOperator)
+                currentOperator = Calculator.getOperator(btn.Text)
+                inputValue = "0"
+                outputValue = "0" & Calculator.getOperatorSign(currentOperator)
+            End If
+        Else
+            Dim previousOperator As Calculator.Operators = currentOperator
+            currentOperator = Calculator.getOperator(btn.Text)
+
+            If firstValue = 0 Then
+                If outputValue.Trim().StartsWith(Calculator.getOperatorSign(Calculator.Operators.MINUS)) Then
+                    Double.TryParse(inputValue, firstValue)
+                    firstValue = 0 - firstValue
+                Else
+                    Double.TryParse(inputValue, firstValue)
+                End If
+            Else
+                Double.TryParse(inputValue, secondValue)
             End If
 
-            Display.Text = outputText
+            If previousOperator <> Calculator.Operators.NONE Then
+                resultValue = Calculator.Calculate(firstValue, secondValue, previousOperator)
 
-            Return
+                inputValue = resultValue
+                outputValue = resultValue & Calculator.getOperatorSign(currentOperator)
+                hasResult = True
+            Else
+                resultValue = 0.0
+                outputValue = inputValue & Calculator.getOperatorSign(currentOperator)
+                hasResult = False
+            End If
+
         End If
 
-        If previousOperation <> Calculator.Operators.NONE Then
-            result = Calculator.Calculate(firstValue, secondValue, previousOperation)
+        DisplayOutput(outputValue)
 
-            outputText = result & Calculator.getOperatorSign(currentOperator)
-
-            firstValue = result
-        ElseIf hasResult And secondValue <> 0 Then
-            result = Calculator.Calculate(firstValue, secondValue, currentOperator)
-
-            outputText = result & Calculator.getOperatorSign(currentOperator)
-
-            firstValue = result
-        Else
-            outputText &= Calculator.getOperatorSign(currentOperator)
-        End If
-
-        hasResult = False
-
-        inputText = ""
-
-        Display.Text = outputText
-
-        If _DEBUG Then Debug.Print("Operator(after)=" & btn.Text & " : firstValue=" & firstValue & ", secondValue=" & secondValue & ", result=" & result & ", inputText=" & inputText & ", outputText=" & outputText & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", previousOperation=" & Calculator.getOperatorSign(previousOperation))
-
-        ' Select the result display as default
-        Display.Select()
+        If _DEBUG Then Debug.Print("Operator(after) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
     End Sub
 
 
     ' ========= EQUAL BUTTON =========
     Private Sub Equal_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Equal.Click
-        If _DEBUG Then Debug.Print("Equal(before) : firstValue=" & firstValue & ", secondValue=" & secondValue & ", result=" & result & ", currentOperation=" & Calculator.getOperatorSign(currentOperator))
+        If _DEBUG Then Debug.Print("Equal(before) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
 
-        ' Set the firstValue if it's zero or else set the second value
-        If firstValue = 0 Then
-            Double.TryParse(inputText, firstValue)
-        Else
-            Double.TryParse(inputText, secondValue)
-        End If
-
-        result = Calculator.Calculate(firstValue, secondValue, currentOperator)
-
-        outputText = result
-        inputText = ""
-
-        firstValue = 0
-        secondValue = 0
-        hasResult = True
-
-        currentOperator = Calculator.Operators.NONE
-
-        Display.Text = outputText
-
-        If _DEBUG Then Debug.Print("Equal(after) : firstValue=" & firstValue & ", secondValue=" & secondValue & ", result=" & result & ", currentOperation=" & Calculator.getOperatorSign(currentOperator))
-
-        ' Select the result display as default
-        Display.Select()
+        If _DEBUG Then Debug.Print("Equal(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
     End Sub
 
 
     ' ========= KEYBOARD INPUT =========
     Private Sub Main_KeyPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles Me.KeyPress
-        Dim key As Char = e.KeyChar
 
-        ' ===== DIGITS & DECIMAL =====
-        If Char.IsDigit(key) OrElse key = Calculator.DOT_SIGN Then
-            Dim btn As New Button()
-
-            btn.Text = key.ToString
-
-            NumberButton_Click(btn, EventArgs.Empty)
-            e.Handled = True
-            Return
-        End If
-
-        ' ===== OPERATORS =====
-        Select Case key
-            Case "+"c, "-"c, "*"c, "/"c
-                Dim opBtn As New Button()
-
-                Select Case key
-                    Case "+"c : opBtn.Text = Calculator.getOperatorSign(Calculator.Operators.PLUS)
-                    Case "-"c : opBtn.Text = Calculator.getOperatorSign(Calculator.Operators.MINUS)
-                    Case "*"c : opBtn.Text = Calculator.getOperatorSign(Calculator.Operators.MULTIPLY)
-                    Case "/"c : opBtn.Text = Calculator.getOperatorSign(Calculator.Operators.DIVIDE)
-                End Select
-
-                OperatorButton_Click(opBtn, EventArgs.Empty)
-                e.Handled = True
-                Return
-        End Select
-
-        ' ===== ENTER (=) =====
-        If key = ChrW(Keys.Enter) OrElse key = "="c Then
-            Equal_Click(Equal, EventArgs.Empty)
-            e.Handled = True
-            Return
-        End If
-
-        ' ===== BACKSPACE =====
-        If key = ChrW(Keys.Back) Then
-            ' Reset variable and previous result if calculation result is set to true
-            If hasResult Then
-                outputText = "0"
-                inputText = ""
-
-                firstValue = 0
-                secondValue = 0
-                result = 0
-
-                currentOperator = Calculator.Operators.NONE
-
-                hasResult = False
-            End If
-
-            ' Delete number from the end if no calculation has been made
-            If Not hasResult AndAlso outputText.Trim().Length > 0 Then
-                outputText = outputText.Substring(0, outputText.Length - 1).Trim()
-                If inputText.Length > 0 Then inputText = inputText.Substring(0, inputText.Length - 1).Trim()
-            End If
-
-            ' If the value is empty replaces it with a zero
-            If outputText.Trim() = "" Then
-                outputText = "0"
-                inputText = ""
-
-                firstValue = 0
-                secondValue = 0
-                result = 0
-
-                currentOperator = Calculator.Operators.NONE
-            End If
-
-            Display.Text = outputText
-
-            ' Select the result display as default
-            Display.Select()
-
-            e.Handled = True
-            Return
-        End If
 
     End Sub
 
 
     ' Handles special keys (like numpad multiply/divide)
     Private Sub Main_KeyDown(ByVal sender As Object, ByVal e As KeyEventArgs) Handles Me.KeyDown
-        Select Case e.KeyCode
-            Case Keys.Multiply
-                OperatorButton_Click(New Button() With {.Text = Calculator.getOperatorSign(Calculator.Operators.MULTIPLY)}, Nothing)
-                e.Handled = True
 
-            Case Keys.Divide
-                OperatorButton_Click(New Button() With {.Text = Calculator.getOperatorSign(Calculator.Operators.DIVIDE)}, Nothing)
-                e.Handled = True
-
-            Case Keys.Add
-                OperatorButton_Click(New Button() With {.Text = Calculator.getOperatorSign(Calculator.Operators.PLUS)}, Nothing)
-                e.Handled = True
-
-            Case Keys.Subtract
-                OperatorButton_Click(New Button() With {.Text = Calculator.getOperatorSign(Calculator.Operators.MINUS)}, Nothing)
-                e.Handled = True
-        End Select
     End Sub
 
+
+    ' ========= Reset Values =========
+    Private Sub ResetValues()
+        hasResult = False
+
+        currentOperator = Calculator.Operators.NONE
+
+        resultValue = 0.0
+        firstValue = 0.0
+        secondValue = 0.0
+
+        inputValue = ""
+        outputValue = ""
+    End Sub
+
+
+    ' ========= Display Output =========
+    Private Sub DisplayOutput(output As String)
+        ' Display the output
+        Display.Text = output
+
+        ' Select the result display as default
+        Display.Select()
+    End Sub
 
     ' ========= RoundedButton =========
     Private Sub RoundedButton(btn As Button)
