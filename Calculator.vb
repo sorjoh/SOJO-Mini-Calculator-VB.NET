@@ -11,7 +11,7 @@
 
 
     ' ========= GET OPERATOR SIGN =========
-    Public Shared Function getOperatorSign(ByVal op As Operators)
+    Public Shared Function getOperationSign(ByVal op As Operators)
         Dim sign As String = ""
 
         Select Case op
@@ -30,23 +30,23 @@
 
 
     ' ========= GET OPERATOR =========
-    Public Shared Function getOperator(ByVal key As String)
-        Dim op As Calculator.Operators
+    Public Shared Function getOperation(ByVal key As String)
+        Dim operation As Calculator.Operators
 
         Select Case key
             Case "+"
-                op = Calculator.Operators.PLUS
+                operation = Calculator.Operators.PLUS
             Case "−", "-"
-                op = Calculator.Operators.MINUS
+                operation = Calculator.Operators.MINUS
             Case "×", "*", "x", "X"
-                op = Calculator.Operators.MULTIPLY
+                operation = Calculator.Operators.MULTIPLY
             Case "÷", "/"
-                op = Calculator.Operators.DIVIDE
+                operation = Calculator.Operators.DIVIDE
             Case Else
-                op = Calculator.Operators.NONE
+                operation = Calculator.Operators.NONE
         End Select
 
-        Return op
+        Return operation
     End Function
 
 

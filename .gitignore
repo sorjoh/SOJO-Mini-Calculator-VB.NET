@@ -399,3 +399,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+*.bkp
+.$Mini Calculator flowchart.drawio.bkp
