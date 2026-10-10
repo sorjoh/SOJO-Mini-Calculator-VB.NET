@@ -106,7 +106,7 @@ Public Class Main
 
         If _DEBUG Then Debug.Print("Number(before) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
 
-        If hasResult Then ResetValues()
+        If hasResult Then inputValue = "" 'Modified 'ResetValues()
 
         If outputValue = "0" Or outputValue = "" Then
             ResetValues()
@@ -181,23 +181,28 @@ Public Class Main
                 Double.TryParse(inputValue, secondValue)
             End If
 
+            ' TODO 4 + - +
             If previousOperator <> Calculator.Operators.NONE Then
                 resultValue = Calculator.Calculate(firstValue, secondValue, previousOperator)
 
                 inputValue = resultValue
+                firstValue = resultValue 'Added
+
                 outputValue = resultValue & Calculator.getOperatorSign(currentOperator)
                 hasResult = True
             Else
                 resultValue = 0.0
+
                 outputValue = inputValue & Calculator.getOperatorSign(currentOperator)
                 hasResult = False
+                inputValue = "" 'Added
             End If
 
         End If
 
         DisplayOutput(outputValue)
 
-        If _DEBUG Then Debug.Print("Operator(after) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
+        If _DEBUG Then Debug.Print("Operator(after) : button=" & btn.Text & ", resultValue=" & resultValue & ", firstValue=" & firstValue & ", secondValue=" & secondValue & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperatorSign(currentOperator) & ", hasResult=" & hasResult)
     End Sub
 
 
