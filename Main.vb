@@ -37,6 +37,8 @@ Public Class Main
     ' Variables holding current and previous operations
     Dim currentOperator As Calculator.Operators = Calculator.Operators.NONE
 
+    Dim isOperator As Boolean
+
     ' Variables holding the result and input values
     Dim resultValue As Double
     Dim firstValue As Double
@@ -98,7 +100,9 @@ Public Class Main
         DisplayOutput("0")
     End Sub
 
-    ' TODO: 12 + 3 - 6 = + 23 = - 12 + 23 =
+    ' TODO: 12 + 3 - 6 = + 23 = - 12 + 25 = (fixed)
+
+    ' TODO: 6 + 23 = - 12 + 25 = (fixed)
 
     ' ========= NUMBER INPUT =========
     Private Sub NumberInput_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Zero.Click, One.Click, Two.Click, Three.Click, Four.Click, Five.Click, Six.Click, Seven.Click, Eight.Click, Nine.Click
@@ -107,7 +111,12 @@ Public Class Main
 
         If _DEBUG Then Debug.Print("Number(before) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
 
-        If hasResult Then inputValue = ""
+        isOperator = False 'added
+
+        If hasResult Then
+            inputValue = ""
+            hasResult = False
+        End If
 
         If outputValue = "0" Or outputValue = "" Then
             ResetValues()
@@ -133,6 +142,8 @@ Public Class Main
         ' TODO: ,2 + ,    
         If inputValue.Contains(DECIMAL_SEPARATOR) Then Return
 
+        isOperator = False 'added
+
         If inputValue = "" Then
             inputValue = "0" & DECIMAL_SEPARATOR
         Else
@@ -150,12 +161,28 @@ Public Class Main
         If _DEBUG Then Debug.Print("Decimal(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
     End Sub
 
+
+    ' TODO: 4 + 5 = -
+
     ' ========= OPERATOR INPUT =========
     Private Sub OperatorInput_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Plus.Click, Minus.Click, Multiply.Click, Divide.Click
         ' Get the current selected button
         Dim btn = CType(sender, Button)
 
         If _DEBUG Then Debug.Print("Operator(before) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
+
+        'added
+        If isOperator Then
+            outputValue = outputValue.TrimEnd(Calculator.getOperationSign(currentOperator))
+            currentOperator = Calculator.getOperation(btn.Text)
+            outputValue &= Calculator.getOperationSign(currentOperator)
+
+            DisplayOutput(outputValue)
+
+            Return
+        End If
+
+        isOperator = True 'added
 
         If inputValue = "" Then
             ResetValues()
@@ -173,17 +200,19 @@ Public Class Main
             currentOperator = Calculator.getOperation(btn.Text)
 
             If firstValue = 0 Then
-                If outputValue.Trim().StartsWith(Calculator.getOperationSign(Calculator.Operators.MINUS)) Then
-                    Double.TryParse(inputValue, firstValue)
-                    firstValue = 0 - firstValue
-                Else
-                    Double.TryParse(inputValue, firstValue)
-                End If
+                'If outputValue.Trim().StartsWith(Calculator.getOperationSign(Calculator.Operators.MINUS)) Then
+                'Double.TryParse(inputValue, firstValue)
+                'firstValue = 0 - firstValue
+                'Else
+                Double.TryParse(inputValue, firstValue)
+                'End If
             Else
                 Double.TryParse(inputValue, secondValue)
-            End If
+        End If
 
             ' TODO: 4 + - +
+            Debug.Print(Calculator.getOperationSign(previousOperator))
+
             If previousOperator <> Calculator.Operators.NONE Then
                 resultValue = Calculator.Calculate(firstValue, secondValue, previousOperator)
 
@@ -195,11 +224,15 @@ Public Class Main
             Else
                 resultValue = 0.0
 
+                'If firstValue <> 0 Then
+                'outputValue = firstValue & Calculator.getOperationSign(currentOperator)
+                'Else
                 outputValue = inputValue & Calculator.getOperationSign(currentOperator)
+                'End If
+
                 inputValue = ""
                 hasResult = False
             End If
-
         End If
 
         DisplayOutput(outputValue)
@@ -212,13 +245,15 @@ Public Class Main
     Private Sub Equal_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Equal.Click
         If _DEBUG Then Debug.Print("Equal(before) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
 
+        isOperator = False 'added
+
         If firstValue = 0 Then
-            If outputValue.Trim().StartsWith(Calculator.getOperationSign(Calculator.Operators.MINUS)) Then
-                Double.TryParse(inputValue, firstValue)
-                firstValue = 0 - firstValue
-            Else
-                Double.TryParse(inputValue, firstValue)
-            End If
+            'If outputValue.Trim().StartsWith(Calculator.getOperationSign(Calculator.Operators.MINUS)) Then
+            'Double.TryParse(inputValue, firstValue)
+            'firstValue = 0 - firstValue
+            'Else
+            Double.TryParse(inputValue, firstValue)
+            'End If
         Else
             Double.TryParse(inputValue, secondValue)
         End If
@@ -343,6 +378,8 @@ Public Class Main
         hasResult = False
 
         currentOperator = Calculator.Operators.NONE
+
+        isOperator = False 'added
 
         resultValue = 0.0
         firstValue = 0.0
