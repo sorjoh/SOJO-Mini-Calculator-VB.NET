@@ -64,7 +64,7 @@
             Case Calculator.Operators.DIVIDE
                 result = firstValue / secondValue
             Case Else
-                Debug.Print("Case Else")
+                result = firstValue
         End Select
 
         Return result
