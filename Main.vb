@@ -29,7 +29,7 @@ Public Class Main
     Const FUNCTION_TEXT_COLOR As Integer = &HFFFDFFFE
 
     ' Max length of the display numbers
-    Const MAX_OUTPUT_LENGTH As Integer = 12
+    Const MAX_OUTPUT_LENGTH As Integer = 13
 
     ' Status indicator if equal button or another calculation has presented a total result
     Dim hasResult As Boolean
@@ -88,6 +88,7 @@ Public Class Main
 
                 If ROUNDED_BUTTON Then RoundedButton(cntrl)
             End If
+            outputValue = DisplayOutput("0")
         Next
 
         ' Set the operator sign for operator buttons
@@ -97,11 +98,10 @@ Public Class Main
         Divide.Text = Calculator.getOperationSign(Calculator.Operators.DIVIDE)
 
         ResetValues()
-        DisplayOutput("0")
+
+        outputValue = DisplayOutput("0")
     End Sub
 
-
-    ' TODO: 23 + 12 = 45
 
     ' ========= NUMBER INPUT =========
     Private Sub NumberInput_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Zero.Click, One.Click, Two.Click, Three.Click, Four.Click, Five.Click, Six.Click, Seven.Click, Eight.Click, Nine.Click
@@ -122,15 +122,15 @@ Public Class Main
         If outputValue = "0" Or outputValue = "" Then
             ResetValues()
             inputValue = btn.Text
-        ElseIf outputValue.Length > MAX_OUTPUT_LENGTH Then
-            Return
+            'ElseIf outputValue.Length > MAX_OUTPUT_LENGTH Then 'Removed
+            'Return
         Else
             inputValue &= btn.Text
         End If
 
         outputValue &= btn.Text
 
-        DisplayOutput(outputValue)
+        outputValue = DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Number(after) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
     End Sub
@@ -168,7 +168,7 @@ Public Class Main
 
         isOperator = False
 
-        DisplayOutput(outputValue)
+        outputValue = DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Decimal(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
     End Sub
@@ -186,7 +186,7 @@ Public Class Main
             currentOperator = Calculator.getOperation(btn.Text)
             outputValue &= Calculator.getOperationSign(currentOperator)
 
-            DisplayOutput(outputValue)
+            outputValue = DisplayOutput(outputValue)
 
             Return
         End If
@@ -234,7 +234,7 @@ Public Class Main
             End If
         End If
 
-        DisplayOutput(outputValue)
+        outputValue = DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Operator(after) : button=" & btn.Text & ", resultValue=" & resultValue & ", firstValue=" & firstValue & ", secondValue=" & secondValue & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult & ", isOperator=" & isOperator)
     End Sub
@@ -272,7 +272,7 @@ Public Class Main
 
         hasResult = True
 
-        DisplayOutput(outputValue)
+        outputValue = DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Equal(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
     End Sub
@@ -363,14 +363,36 @@ Public Class Main
     Private Sub Delete()
         If _DEBUG Then Debug.Print("Delete(before) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
 
-        hasResult = False
-        isOperator = False
-        currentOperator = Calculator.Operators.NONE
+        'added
+        If hasResult And isOperator = False Then
+            ResetValues()
+            outputValue = DisplayOutput("0")
+
+            Return
+        End If
+
+        'removed
+
+        'hasResult = False
+        'isOperator = False
+        'currentOperator = Calculator.Operators.NONE
 
         ' Delete number from the end if no calculation has been made
         Try
             outputValue = outputValue.Substring(0, outputValue.Length - 1).Trim()
-            inputValue = outputValue
+
+            ' Added and modified
+            Dim splittedValues = outputValue.Split(Calculator.getOperationSign(currentOperator))
+
+            If splittedValues.Length > 1 Then
+                inputValue = splittedValues(1)
+            Else
+                inputValue = outputValue
+
+                hasResult = False
+                isOperator = False
+                currentOperator = Calculator.Operators.NONE
+            End If
         Catch e As Exception
             Debug.Print(e.ToString)
         End Try
@@ -383,7 +405,7 @@ Public Class Main
 
         If _DEBUG Then Debug.Print("Delete(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
 
-        DisplayOutput(outputValue)
+        outputValue = DisplayOutput(outputValue)
     End Sub
 
 
@@ -405,7 +427,7 @@ Public Class Main
 
 
     ' ========= Display Output =========
-    Private Sub DisplayOutput(output As String)
+    Private Function DisplayOutput(ByVal output As String) As String
         ' Fix for double outputs of operators
         Dim hasDoubleOperator As Boolean = False
         Dim firstOperator As String = ""
@@ -441,12 +463,28 @@ Public Class Main
 
         If output.StartsWith("0" & Calculator.getOperationSign(Calculator.Operators.MINUS)) Then output = output.Replace("0" & Calculator.getOperationSign(Calculator.Operators.MINUS), Calculator.getOperationSign(Calculator.Operators.MINUS))
 
+        'Added
+        If output.StartsWith("0") And output.Length > 1 And output.Contains(DECIMAL_SEPARATOR) = False Then
+            If Asc(output.Substring(1, 1)) > 48 And Asc(output.Substring(1, 1)) < 58 Or output.StartsWith("00") Then
+                output = output.TrimStart("0")
+            End If
+        End If
+
+        'Added
+        If output = "" Then output = "0"
+
         ' Display the output
-        Display.Text = output
+        If output.Length > MAX_OUTPUT_LENGTH And output.Contains("...") = False Then
+            Display.Text = output.Substring(0, MAX_OUTPUT_LENGTH - 1) & "..."
+        Else
+            Display.Text = output
+        End If
 
         ' Select the result display as default
         Display.Select()
-    End Sub
+
+        Return output 'Modified
+    End Function
 
     ' ========= RoundedButton =========
     Private Sub RoundedButton(btn As Button)
