@@ -122,8 +122,6 @@ Public Class Main
         If outputValue = "0" Or outputValue = "" Then
             ResetValues()
             inputValue = btn.Text
-            'ElseIf outputValue.Length > MAX_OUTPUT_LENGTH Then 'Removed
-            'Return
         Else
             inputValue &= btn.Text
         End If
@@ -359,11 +357,10 @@ Public Class Main
     End Sub
 
 
-    ' ========= Delete =========
+    ' ========= Delete (by keyboard) =========
     Private Sub Delete()
         If _DEBUG Then Debug.Print("Delete(before) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
 
-        'added
         If hasResult And isOperator = False Then
             ResetValues()
             outputValue = DisplayOutput("0")
@@ -371,17 +368,10 @@ Public Class Main
             Return
         End If
 
-        'removed
-
-        'hasResult = False
-        'isOperator = False
-        'currentOperator = Calculator.Operators.NONE
-
         ' Delete number from the end if no calculation has been made
         Try
             outputValue = outputValue.Substring(0, outputValue.Length - 1).Trim()
 
-            ' Added and modified
             Dim splittedValues = outputValue.Split(Calculator.getOperationSign(currentOperator))
 
             If splittedValues.Length > 1 Then
@@ -461,21 +451,27 @@ Public Class Main
 
         If hasDoubleOperator Then output = output.Replace(firstOperator & secondOperator, secondOperator)
 
-        If output.StartsWith("0" & Calculator.getOperationSign(Calculator.Operators.MINUS)) Then output = output.Replace("0" & Calculator.getOperationSign(Calculator.Operators.MINUS), Calculator.getOperationSign(Calculator.Operators.MINUS))
-
-        'Added
         If output.StartsWith("0") And output.Length > 1 And output.Contains(DECIMAL_SEPARATOR) = False Then
             If Asc(output.Substring(1, 1)) > 48 And Asc(output.Substring(1, 1)) < 58 Or output.StartsWith("00") Then
                 output = output.TrimStart("0")
             End If
         End If
 
-        'Added
         If output = "" Then output = "0"
 
         ' Display the output
         If output.Length > MAX_OUTPUT_LENGTH And output.Contains("...") = False Then
             Display.Text = output.Substring(0, MAX_OUTPUT_LENGTH - 1) & "..."
+        ElseIf output = "0" & Calculator.getOperationSign(Calculator.Operators.MINUS) Or output = Calculator.getOperationSign(Calculator.Operators.MINUS) Then
+            ResetValues()
+
+            currentOperator = Calculator.Operators.MINUS
+            isOperator = True
+            hasResult = True
+
+            output = "0" & Calculator.getOperationSign(Calculator.Operators.MINUS)
+
+            Display.Text = output
         Else
             Display.Text = output
         End If
@@ -483,7 +479,7 @@ Public Class Main
         ' Select the result display as default
         Display.Select()
 
-        Return output 'Modified
+        Return output
     End Function
 
     ' ========= RoundedButton =========
