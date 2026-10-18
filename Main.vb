@@ -227,33 +227,57 @@ Public Class Main
     Private Sub Equal_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Equal.Click
         If _DEBUG Then Debug.Print("Equal(before) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
 
-        ' Clear if Equal is pressed twice
-        If hasResult And hasOperator = False Then
+        If hasResult Then
+            'If hasOperator Then
             ResetValues()
-        ElseIf hasResult Then
-            currentOperator = Calculator.Operators.NONE
+
+            'Else
+            'currentOperator = Calculator.Operators.NONE
+            'End If
+        Else
+            Dim splittedOutputValue = outputValue.Split(Calculator.getOperationSign(currentOperator))
+
+            outputValue = splittedOutputValue(0)
+            inputValue = splittedOutputValue(1)
+
+            Double.TryParse(outputValue, firstValue)
+            Double.TryParse(inputValue, secondValue)
+
+            resultValue = Calculator.Calculate(firstValue, secondValue, currentOperator)
+
+            outputValue = resultValue.ToString
         End If
 
         hasOperator = False
-
-        If firstValue = 0 Then
-            Double.TryParse(inputValue, firstValue)
-
-            If currentOperator = Calculator.Operators.MINUS Then firstValue = 0 - firstValue
-        Else
-            Double.TryParse(inputValue, secondValue)
-        End If
-
-        resultValue = Calculator.Calculate(firstValue, secondValue, currentOperator)
-
-        inputValue = resultValue
-        firstValue = resultValue
-
-        outputValue = resultValue
-
-        currentOperator = Calculator.Operators.NONE
-
         hasResult = True
+
+        '' Clear if Equal is pressed twice
+        'If hasResult And hasOperator = False Then
+        '    ResetValues()
+        'ElseIf hasResult Then
+        '    currentOperator = Calculator.Operators.NONE
+        'End If
+
+        'hasOperator = False
+
+        'If firstValue = 0 Then
+        '    Double.TryParse(inputValue, firstValue)
+
+        '    If currentOperator = Calculator.Operators.MINUS Then firstValue = 0 - firstValue
+        'Else
+        '    Double.TryParse(inputValue, secondValue)
+        'End If
+
+        'resultValue = Calculator.Calculate(firstValue, secondValue, currentOperator)
+
+        'inputValue = resultValue
+        'firstValue = resultValue
+
+        'outputValue = resultValue
+
+        'currentOperator = Calculator.Operators.NONE
+
+        'hasResult = True
 
         outputValue = DisplayOutput(outputValue)
 
@@ -404,7 +428,12 @@ Public Class Main
     ' ========= Display Output =========
     Private Function DisplayOutput(ByVal output As String) As String
 
-        Display.Text = output
+        If output = "" Then
+            Display.Text = "0"
+        Else
+            Display.Text = output
+        End If
+
 
         ' Fix for double outputs of operators
         'Dim hasDoubleOperator As Boolean = False
