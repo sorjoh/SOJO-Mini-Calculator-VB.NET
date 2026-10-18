@@ -7,7 +7,6 @@ https://ecdn.teacherspayteachers.com/thumbitem/Calculator-Functions-Anchor-Chart
 
 ![Screenshot 2026-10-19 011609](https://github.com/sorjoh/SOJO-Mini-Calculator-VB.NET/blob/main/MiniCalculator.png)
 
-Flowchart:
 ![Screenshot 2026-10-19 011609](https://github.com/sorjoh/SOJO-Mini-Calculator-VB.NET/blob/main/_Flowcharts%20And%20Diagrams_/Flowcharts/PNG/00%20Mini%20Calculator%20-%20Complete%20Flowchart.png)
 
 ## Features
