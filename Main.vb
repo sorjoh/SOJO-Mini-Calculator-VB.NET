@@ -119,7 +119,12 @@ Public Class Main
             outputValue = inputValue
         ElseIf hasOperator Then
             Dim splittedOutputValue = outputValue.Split(Calculator.getOperationSign(currentOperator))
-            inputValue &= inputKey
+
+            If inputValue = "0" Then
+                inputValue = inputKey
+            Else
+                inputValue &= inputKey
+            End If
 
             Dim currentResultValue As String = splittedOutputValue(0)
 
@@ -128,10 +133,10 @@ Public Class Main
             End If
 
             outputValue = currentResultValue & Calculator.getOperationSign(currentOperator) & inputValue
-        Else
-            inputValue &= inputKey
-            outputValue = inputValue
-        End If
+            Else
+                inputValue &= inputKey
+                outputValue = inputValue
+            End If
 
         DisplayOutput(outputValue)
 
@@ -142,6 +147,8 @@ Public Class Main
     ' ========= DECIMAL INPUT =========
     Private Sub DecimalInput_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Dot.Click
         If _DEBUG Then Debug.Print("Decimal(before) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult & ", hasOperator=" & hasOperator)
+
+        'TODO: 2,3 + 3 = ,
 
         If hasResult Then
             ResetValues()
