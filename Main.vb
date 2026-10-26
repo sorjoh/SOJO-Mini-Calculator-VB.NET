@@ -34,9 +34,8 @@ Public Class Main
     ' Status indicator if equal button or another calculation has presented a total result
     Dim hasResult As Boolean
 
-    ' Variables holding current and previous operations
+    ' Variables holding current operations
     Dim currentOperator As Calculator.Operators = Calculator.Operators.NONE
-
     Dim hasOperator As Boolean
 
     ' Variables holding the result and input values
@@ -48,9 +47,10 @@ Public Class Main
     Dim inputValue As String
     Dim outputValue As String
 
-    Dim isEqual As Boolean ' Fix for example 2.3 + 5 = .
+    ' Variable for checking if equal has been pressed or not
+    Dim isEqual As Boolean
 
-    ' Get decimal seperator
+    ' Get decimal separator
     Dim DECIMAL_SEPARATOR As String = Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator
 
     ' ========= MAIN FORM - Control Added =========
@@ -111,35 +111,48 @@ Public Class Main
 
         If _DEBUG Then Debug.Print("Number(before) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult & ", hasOperator=" & hasOperator)
 
+        ' Get the number
         Dim inputKey As String = btn.Text
 
-        If hasResult Then
+        If hasResult Then ' Calculation has result
+            ' Reset all values
             ResetValues()
+            ' Add the first number to inputValue
             inputValue = inputKey
+            ' Replace outputValue with the newly and initialized inputValue
             outputValue = inputValue
-        ElseIf hasOperator Then
+        ElseIf hasOperator Then ' Calculation has operator
+            ' Get first and second value from the output
             Dim splittedOutputValue = outputValue.Split(Calculator.getOperationSign(currentOperator))
 
+            ' Add the number to inputValue
             If inputValue = "0" Then
-                inputValue = inputKey
+                inputValue = inputKey ' If inputValue is zero
             Else
-                inputValue &= inputKey
+                inputValue &= inputKey ' Otherwise add the number to inputValue
             End If
 
+            ' Set current result initially as the first split value from the outputValue
             Dim currentResultValue As String = splittedOutputValue(0)
 
+            ' Add minus sign in the beginning if current result value is empty and operator is minus 
             If currentOperator = Calculator.Operators.MINUS And currentResultValue = "" Then
                 currentResultValue = Calculator.getOperationSign(Calculator.Operators.MINUS) & splittedOutputValue(1)
             End If
 
+            ' Replace output value with the temporary current result value together with current operator sign and input value
             outputValue = currentResultValue & Calculator.getOperationSign(currentOperator) & inputValue
         Else
+            ' Otherwise add the number to input value
             inputValue &= inputKey
+            ' Replace output value with the new input value
             outputValue = inputValue
         End If
 
-        isEqual = False ' Fix for example 2.3 + 5 = .
+        ' Equal button has not been pressed
+        isEqual = False
 
+        ' Display the output
         DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Number(after) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult & ", hasOperator=" & hasOperator)
@@ -150,18 +163,23 @@ Public Class Main
     Private Sub DecimalInput_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Dot.Click
         If _DEBUG Then Debug.Print("Decimal(before) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult & ", hasOperator=" & hasOperator)
 
-        If hasResult Then
+        If hasResult Then ' Calculation has result
+            ' Reset all values
             ResetValues()
-        Else
+        Else ' Calculation has no result
+            ' Get first and second value from the output
             Dim splittedOutputValue = outputValue.Split(Calculator.getOperationSign(currentOperator))
 
-            If hasOperator Then
+            If hasOperator Then ' Calculation has operator
+                ' Set output value to the first split output value plus the current operator sign
                 outputValue = splittedOutputValue(0) & Calculator.getOperationSign(currentOperator)
+                ' Set input value to the second split output value
                 inputValue = splittedOutputValue(1)
-            Else
+            Else ' Otherwise if calculation has no operator
+                ' Set output value to a empty string
                 outputValue = ""
 
-                ' Fix for example 2.3 + 5 = .
+                ' If equal has been pressed before this button then replace inputValue with the a empty string, otherwise add the first split value
                 If isEqual Then
                     inputValue = ""
                 Else
@@ -169,17 +187,22 @@ Public Class Main
                 End If
             End If
 
+            ' Check if input value already contains a decimal otherwise add the decimal separator
             If Not inputValue.Contains(DECIMAL_SEPARATOR) Then
                 inputValue &= DECIMAL_SEPARATOR
             End If
         End If
 
+        ' Add a zero before the decimal separator if the input value begins with a decimal
         If inputValue.StartsWith(DECIMAL_SEPARATOR) Then inputValue = "0" & inputValue
 
+        ' Add the decimal and the result of input value to the output value
         outputValue &= inputValue
 
-        isEqual = False ' Fix for example 2.3 + 5 = .
+        ' Equal button has not been pressed
+        isEqual = False
 
+        ' Display the output
         DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Decimal(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult & ", hasOperator=" & hasOperator)
@@ -427,20 +450,24 @@ Public Class Main
 
     ' ========= Reset Values =========
     Private Sub ResetValues()
+        ' Status indicator if equal button or another calculation has presented a total result
         hasResult = False
 
+        'Variables holding current operations
         currentOperator = Calculator.Operators.NONE
-
         hasOperator = False
 
+        ' Variables holding the result and input values
         resultValue = 0.0
         firstValue = 0.0
         secondValue = 0.0
 
+        ' Variables holding the input and output text
         inputValue = ""
         outputValue = ""
 
-        isEqual = False ' Fix for example 2.3 + 5 = .
+        ' Variable for checking if equal has been pressed or not
+        isEqual = False
     End Sub
 
 
