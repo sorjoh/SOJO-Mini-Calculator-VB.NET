@@ -48,7 +48,7 @@ Public Class Main
     Dim inputValue As String
     Dim outputValue As String
 
-    Dim isEqual As Boolean 'Bugfix for 2.3 + 5 = .
+    Dim isEqual As Boolean ' Fix for example 2.3 + 5 = .
 
     ' Get decimal seperator
     Dim DECIMAL_SEPARATOR As String = Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator
@@ -90,7 +90,6 @@ Public Class Main
 
                 If ROUNDED_BUTTON Then RoundedButton(cntrl)
             End If
-            'outputValue = DisplayOutput("0")
         Next
 
         ' Set the operator sign for operator buttons
@@ -101,7 +100,6 @@ Public Class Main
 
         ResetValues()
 
-        'outputValue = 
         DisplayOutput()
     End Sub
 
@@ -135,12 +133,12 @@ Public Class Main
             End If
 
             outputValue = currentResultValue & Calculator.getOperationSign(currentOperator) & inputValue
-            Else
-                inputValue &= inputKey
-                outputValue = inputValue
-            End If
+        Else
+            inputValue &= inputKey
+            outputValue = inputValue
+        End If
 
-        isEqual = False 'Bugfix for 2.3 + 5 = 
+        isEqual = False ' Fix for example 2.3 + 5 = .
 
         DisplayOutput(outputValue)
 
@@ -163,7 +161,7 @@ Public Class Main
             Else
                 outputValue = ""
 
-                'Bugfix 2.3 + 5 = .
+                ' Fix for example 2.3 + 5 = .
                 If isEqual Then
                     inputValue = ""
                 Else
@@ -180,9 +178,8 @@ Public Class Main
 
         outputValue &= inputValue
 
-        isEqual = False 'Bugfix for 2.3 + 5 = 
+        isEqual = False ' Fix for example 2.3 + 5 = .
 
-        'outputValue = 
         DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Decimal(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult & ", hasOperator=" & hasOperator)
@@ -214,7 +211,12 @@ Public Class Main
             Double.TryParse(outputValue, firstValue)
             Double.TryParse(inputValue, secondValue)
 
-            resultValue = Calculator.Calculate(firstValue, secondValue, previousOperator)
+            ' Fix for example 12 * %
+            If secondValue <> 0.0 Then
+                resultValue = Calculator.Calculate(firstValue, secondValue, previousOperator)
+            Else
+                resultValue = firstValue
+            End If
 
             currentOperator = Calculator.getOperation(btn.Text)
 
@@ -236,9 +238,8 @@ Public Class Main
 
         hasOperator = True
 
-        isEqual = False 'Bugfix for 2.3 + 5 = 
+        isEqual = False ' Fix for example 2.3 + 5 = .
 
-        'outputValue = 
         DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Operator(after) : button=" & btn.Text & ", resultValue=" & resultValue & ", firstValue=" & firstValue & ", secondValue=" & secondValue & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult & ", hasOperator=" & hasOperator)
@@ -261,13 +262,28 @@ Public Class Main
                 inputValue = splittedOutputValue(1)
             End If
         Catch ex As Exception
+            Dim tmpOutputValue As String = ""
+
+            ' Fix for example 22 =
+            If Not isEqual Then
+                tmpOutputValue = outputValue
+            Else
+                tmpOutputValue = ""
+            End If
+
             ResetValues()
+
+            outputValue = tmpOutputValue
         End Try
 
         Double.TryParse(outputValue, firstValue)
         Double.TryParse(inputValue, secondValue)
 
-        resultValue = Calculator.Calculate(firstValue, secondValue, currentOperator)
+        If hasOperator Then
+            resultValue = Calculator.Calculate(firstValue, secondValue, currentOperator)
+        Else
+            Double.TryParse(outputValue, resultValue)
+        End If
 
         inputValue = ""
         outputValue = resultValue.ToString
@@ -276,9 +292,8 @@ Public Class Main
         hasOperator = False
         hasResult = False
 
-        isEqual = True 'Bugfix for 2.3 + 5 = 
+        isEqual = True ' Fix for example 2.3 + 5 = .
 
-        'outputValue = 
         DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Equal(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
@@ -404,9 +419,8 @@ Public Class Main
 
         If _DEBUG Then Debug.Print("Delete(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
 
-        isEqual = False 'Bugfix for 2.3 + 5 = 
+        isEqual = False ' Fix for example 2.3 + 5 = .
 
-        'outputValue = 
         DisplayOutput(outputValue)
     End Sub
 
@@ -426,7 +440,7 @@ Public Class Main
         inputValue = ""
         outputValue = ""
 
-        isEqual = False 'Bugfix for 2.3 + 5 = .
+        isEqual = False ' Fix for example 2.3 + 5 = .
     End Sub
 
 
