@@ -216,53 +216,81 @@ Public Class Main
 
         If _DEBUG Then Debug.Print("Operator(before) : button=" & btn.Text & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult & ", hasOperator=" & hasOperator)
 
+        ' Save current operator as previous operator
         Dim previousOperator = currentOperator
 
-        If hasOperator Then
+        If hasOperator Then ' Calculation has operator
+            ' Get first and second value from the output
             Dim splittedOutputValue = outputValue.Split(Calculator.getOperationSign(previousOperator))
 
+            ' Reset values
             ResetValues()
 
+            ' Set output value to the first split output value
             outputValue = splittedOutputValue(0)
+            ' Set input value to the second split output value
             inputValue = splittedOutputValue(1)
 
+            ' Add minus sign in the beginning if current output value is empty and previous operator is minus 
             If previousOperator = Calculator.Operators.MINUS And outputValue = "" Then
+                ' Set output value to the second split output value
                 outputValue = Calculator.getOperationSign(Calculator.Operators.MINUS) & splittedOutputValue(1)
+                ' Set input value to the third split output value
                 inputValue = splittedOutputValue(2)
             End If
 
+            ' Set firstValue as double value of outputValue
             Double.TryParse(outputValue, firstValue)
+            ' Set secondValue as double value of inputValue
             Double.TryParse(inputValue, secondValue)
 
-            ' Fix for example 12 * %
+            ' Calculate the result if second value is present
             If secondValue <> 0.0 Then
+                ' Calculate the result
                 resultValue = Calculator.Calculate(firstValue, secondValue, previousOperator)
             Else
+                'Set result value to the first value
                 resultValue = firstValue
             End If
 
+            ' Get the current operator
             currentOperator = Calculator.getOperation(btn.Text)
 
+            ' Set input value to an empty string
             inputValue = ""
+
+            ' Replace output value with the result plus the current operator sign
             outputValue = resultValue & Calculator.getOperationSign(currentOperator)
-        ElseIf outputValue = "" Then
+        ElseIf outputValue = "" Then ' Output value is empty
+            ' Reset values
             ResetValues()
 
+            ' Set current operator
             currentOperator = Calculator.getOperation(btn.Text)
 
+            ' Set input value to zero
             inputValue = "0"
+
+            ' Replace output value with the input value plus the current operator sign
             outputValue = inputValue & Calculator.getOperationSign(currentOperator)
-        Else
+        Else ' Calculation has no operator and output value is not empty
+            ' Set current operator
             currentOperator = Calculator.getOperation(btn.Text)
 
+            ' Set input value to a empty string
             inputValue = ""
+
+            ' Add the current operator sign to output value
             outputValue &= Calculator.getOperationSign(currentOperator)
         End If
 
+        ' Tell the app that a operator is present
         hasOperator = True
 
-        isEqual = False ' Fix for example 2.3 + 5 = .
+        ' Equal button has not been pressed
+        isEqual = False
 
+        ' Display the output
         DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Operator(after) : button=" & btn.Text & ", resultValue=" & resultValue & ", firstValue=" & firstValue & ", secondValue=" & secondValue & ", inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult & ", hasOperator=" & hasOperator)
@@ -273,50 +301,72 @@ Public Class Main
     Private Sub Equal_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Equal.Click
         If _DEBUG Then Debug.Print("Equal(before) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
 
+        ' Get first and second value from the output
         Dim splittedOutputValue = outputValue.Split(Calculator.getOperationSign(currentOperator))
 
+        ' Set output value to the first split output value
         outputValue = splittedOutputValue(0)
 
         Try
+            ' Add minus sign in the beginning if current output value is empty and current operator is minus
             If currentOperator = Calculator.Operators.MINUS And outputValue = "" Then
+                ' Set output value to the second split output value
                 outputValue = Calculator.getOperationSign(Calculator.Operators.MINUS) & splittedOutputValue(1)
+                ' Set input value to the third split output value
                 inputValue = splittedOutputValue(2)
-            Else
+            Else ' Otherwise set input value to the second split output value 
                 inputValue = splittedOutputValue(1)
             End If
         Catch ex As Exception
             Dim tmpOutputValue As String = ""
 
-            ' Fix for example 22 =
-            If Not isEqual Then
-                tmpOutputValue = outputValue
-            Else
+            ' Reset all values if Equal been pressed twice, otherwise reset all values except for the output value
+            If isEqual Then
                 tmpOutputValue = ""
+            Else
+                tmpOutputValue = outputValue ' Save the output value
             End If
 
+            ' Reset values
             ResetValues()
 
+            ' Restore the output value if needed
             outputValue = tmpOutputValue
         End Try
 
+        ' Set firstValue as double value of outputValue
         Double.TryParse(outputValue, firstValue)
+
+        ' Set secondValue as double value of inputValue
         Double.TryParse(inputValue, secondValue)
 
-        If hasOperator Then
+        If hasOperator Then ' alculation has operator
+            ' Calculate the result
             resultValue = Calculator.Calculate(firstValue, secondValue, currentOperator)
         Else
+            ' Set resultValue as double value of outputValue
             Double.TryParse(outputValue, resultValue)
         End If
 
+        ' Set input value to an empty string
         inputValue = ""
+
+        ' Convert result value to string
         outputValue = resultValue.ToString
 
+        ' Set current operator to none
         currentOperator = Calculator.Operators.NONE
+
+        ' No operator is used
         hasOperator = False
+
+        ' Set a flag that no result has been calculated, even if it has been done
         hasResult = False
 
-        isEqual = True ' Fix for example 2.3 + 5 = .
+        ' Tell the app that equal has been pressed
+        isEqual = True
 
+        ' Display the output
         DisplayOutput(outputValue)
 
         If _DEBUG Then Debug.Print("Equal(after) : inputValue=" & inputValue & ", outputValue=" & outputValue & ", Display=" & Display.Text & ", currentOperation=" & Calculator.getOperationSign(currentOperator) & ", hasResult=" & hasResult)
@@ -473,8 +523,10 @@ Public Class Main
 
     ' ========= Display Output =========
     Private Sub DisplayOutput(Optional ByVal output As String = "0")
+        ' Display the output
         Display.Text = output
 
+        ' Unfocus the keys
         Display.Select()
     End Sub
 
