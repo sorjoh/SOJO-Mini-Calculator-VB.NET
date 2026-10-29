@@ -10,11 +10,11 @@
 Public Class Main
 
     ' Use debugging if needed
-    Const _DEBUG As Boolean = True
+    Const _DEBUG As Boolean = False
 
     ' Use rounded controls or not
-    Const ROUNDED_BUTTON As Boolean = True
-    Const ROUNDED_DISPLAY As Boolean = True
+    Const ROUNDED_BUTTON As Boolean = False
+    Const ROUNDED_DISPLAY As Boolean = False
 
     ' Background and text colors
     Const CALCULATOR_BACKGROUND_COLOR As Integer = &HFF585A67
@@ -245,12 +245,12 @@ Public Class Main
             Double.TryParse(inputValue, secondValue)
 
             ' Calculate the result if second value is present
-            If secondValue <> 0.0 Then
-                ' Calculate the result
-                resultValue = Calculator.Calculate(firstValue, secondValue, previousOperator)
-            Else
+            If secondValue = 0.0 Then
                 'Set result value to the first value
                 resultValue = firstValue
+            Else
+                ' Calculate the result
+                resultValue = Calculator.Calculate(firstValue, secondValue, previousOperator)
             End If
 
             ' Get the current operator
